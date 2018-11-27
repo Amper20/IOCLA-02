@@ -18,7 +18,27 @@ global main
 
 xor_strings:
 	; TODO TASK 1
-	ret
+        push ebp
+        mov ebp, esp
+ 
+        mov ecx, [ebp + 8]
+        mov ebx, [ebp + 12]
+        
+        mov eax, ecx
+        
+loop_enc:
+        xor edx,edx
+        mov dl, byte[ecx]
+        xor dl, byte[ebx]
+        mov byte[ecx], dl
+        inc ecx
+        inc ebx
+        cmp byte[ecx],0
+        je lv
+        jmp loop_enc
+lv:
+        leave
+        ret
 
 rolling_xor:
 	; TODO TASK 2
@@ -111,17 +131,36 @@ task1:
 	; TASK 1: Simple XOR between two byte streams
 
 	; TODO TASK 1: find the address for the string and the key
-	; TODO TASK 1: call the xor_strings function
+    	mov ebx, ecx
+        
+find_key1:
+        inc ebx
+        cmp byte[ebx], 0
+        je done1
+        jmp find_key1
+done1:
+        inc ebx
+        ; TODO TASK 1: call the xor_strings function
+        push ebx
+        push ecx
+        call xor_strings
+        add esp, 8
+        
+        push eax
+        call puts                   ;print resulting string
+        add esp, 4
 
-	push ecx
-	call puts                   ;print resulting string
-	add esp, 4
-
-	jmp task_done
+        jmp task_done
 
 task2:
 	; TASK 2: Rolling XOR
-
+find_key2:
+        inc ebx
+        cmp byte[ebx], 0
+        je done2
+        jmp find_key2
+done2:
+        inc ebx
 	; TODO TASK 2: call the rolling_xor function
 
 	push ecx
