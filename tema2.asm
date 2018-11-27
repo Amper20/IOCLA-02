@@ -42,8 +42,26 @@ lv:
 
 rolling_xor:
 	; TODO TASK 2
-	ret
+        push ebp
+        mov ebp, esp
+ 
+        mov ecx, [ebp + 8]
+        mov eax, ecx
+        mov dl, byte[ecx]
+        inc ecx
+loop_enc1:
+        xor dl, byte[ecx]
+        mov bl, byte[ecx] 
+        mov byte[ecx],dl
+        mov dl, bl       
+        inc ecx
+        cmp byte[ecx],0
+        je lv1
+        jmp loop_enc1
+lv1:
 
+        leave
+        ret
 xor_hex_strings:
 	; TODO TASK 3
 	ret
@@ -154,16 +172,11 @@ done1:
 
 task2:
 	; TASK 2: Rolling XOR
-find_key2:
-        inc ebx
-        cmp byte[ebx], 0
-        je done2
-        jmp find_key2
-done2:
-        inc ebx
-	; TODO TASK 2: call the rolling_xor function
-
-	push ecx
+        push ecx
+        call rolling_xor
+        add esp, 4
+        
+	push eax
 	call puts
 	add esp, 4
 
