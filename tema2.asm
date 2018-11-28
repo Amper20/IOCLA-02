@@ -1,11 +1,13 @@
 extern puts
 extern printf
 extern strlen
-
+%include "io.inc"
 %define BAD_ARG_EXIT_CODE -1
 
 section .data
-filename: db "./input0.dat", 0
+;filename: db "./input0.dat", 0
+filename: db "/home/master/Desktop/iocla-tema2-resurse/IOCLA-02/input3.dat", 0
+
 inputlen: dd 2263
 
 fmtstr:            db "Key: %d",0xa, 0
@@ -64,6 +66,44 @@ lv1:
         ret
 xor_hex_strings:
 	; TODO TASK 3
+        push ebp
+        mov ebp, esp
+ 
+        mov ecx, [ebp + 8]
+        mov ebx, [ebp + 12]
+        
+loop_hex:
+        cmp byte[ecx], 97
+        jge chr
+        jmp num
+chr:
+        sub byte[ecx], 97
+        add byte[ecx], 10
+num:
+        sub byte[ecx], 48
+        xor edx, edx
+        add dl, byte[ecx]
+        shl edx,4
+       
+        inc ecx
+        cmp byte[ecx], 97
+        jge chr1
+        jmp num1
+chr1:
+        sub byte[ecx], 97
+        add byte[ecx], 10
+num1:
+        sub byte[ecx], 48
+        xor edx, edx
+        add dl, byte[ecx]
+        ;PRINT_UDEC 4, edx
+        
+        cmp byte[ecx],0
+        je loop_hex_done
+        jmp loop_hex
+        
+loop_hex_done:
+        leave
 	ret
 
 base32decode:
@@ -79,23 +119,25 @@ decode_vigenere:
 	ret
 
 main:
+    mov ebp, esp; for correct debugging
 	push ebp
 	mov ebp, esp
 	sub esp, 2300
 
 	; test argc
-	mov eax, [ebp + 8]
-	cmp eax, 2
-	jne exit_bad_arg
+	;mov eax, [ebp + 8]
+	;cmp eax, 2
+	;jne exit_bad_arg
 
 	; get task no
-	mov ebx, [ebp + 12]
-	mov eax, [ebx + 4]
-	xor ebx, ebx
-	mov bl, [eax]
-	sub ebx, '0'
-	push ebx
-
+	;mov ebx, [ebp + 12]
+	;mov eax, [ebx + 4]
+	;xor ebx, ebx
+	;mov bl, [eax]
+	;sub ebx, '0'
+	;push ebx
+        
+        mov ebx,3
 	; verify if task no is in range
 	cmp ebx, 1
 	jb exit_bad_arg
@@ -187,6 +229,20 @@ task3:
 
 	; TODO TASK 1: find the addresses of both strings
 	; TODO TASK 1: call the xor_hex_strings function
+
+        mov ebx, ecx
+find_key3:
+        inc ebx
+        cmp byte[ebx], 0
+        je done3
+        jmp find_key3
+done3:
+        inc ebx
+        ; TODO TASK 1: call the xor_strings function
+        push ebx
+        push ecx
+        call xor_hex_strings
+        add esp, 8
 
 	push ecx                     ;print resulting string
 	call puts
