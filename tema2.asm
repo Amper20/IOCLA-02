@@ -5,8 +5,8 @@ extern strlen
 %define BAD_ARG_EXIT_CODE -1
 
 section .data
-;filename: db "./input0.dat", 0
-filename: db "/home/master/Desktop/iocla-tema2-resurse/IOCLA-02/input3.dat", 0
+;filename: db "/input0.dat", 0
+filename: db "/home/master/Desktop/iocla-tema2-resurse/IOCLA-02/input4.dat", 0
 
 inputlen: dd 2263
 
@@ -71,6 +71,7 @@ xor_hex_strings:
  
         mov ecx, [ebp + 8]
         mov ebx, [ebp + 12]
+        mov eax, ecx
         
 loop_hex:
         cmp byte[ecx], 97
@@ -79,8 +80,10 @@ loop_hex:
 chr:
         sub byte[ecx], 97
         add byte[ecx], 10
+        jmp don
 num:
         sub byte[ecx], 48
+don:
         xor edx, edx
         add dl, byte[ecx]
         shl edx,4
@@ -92,17 +95,57 @@ num:
 chr1:
         sub byte[ecx], 97
         add byte[ecx], 10
+        jmp don1
 num1:
         sub byte[ecx], 48
-        xor edx, edx
+don1:
         add dl, byte[ecx]
-        ;PRINT_UDEC 4, edx
+        
+        inc ecx
+        
+        ;key
+        push eax
+        cmp byte[ebx], 97
+        jge chr2
+        jmp num2
+chr2:
+        sub byte[ebx], 97
+        add byte[ebx], 10
+        jmp don2
+num2:
+        sub byte[ebx], 48        
+don2:
+        xor eax, eax
+        add al, byte[ebx]
+        shl eax,4
+       
+        inc ebx
+        cmp byte[ebx], 97
+        jge chr3
+        jmp num3
+chr3:
+        sub byte[ebx], 97
+        add byte[ebx], 10
+        jmp don3
+num3:
+        sub byte[ebx], 48
+don3:
+        add al, byte[ebx]
+
+        
+        inc ebx
+        xor edx, eax
+        pop eax
+        mov [eax], dl
+        inc eax
         
         cmp byte[ecx],0
         je loop_hex_done
         jmp loop_hex
         
 loop_hex_done:
+        mov byte[eax],0
+        mov ecx, [ebp + 8] 
         leave
 	ret
 
@@ -130,8 +173,8 @@ main:
 	;jne exit_bad_arg
 
 	; get task no
-	;mov ebx, [ebp + 12]
-	;mov eax, [ebx + 4]
+        ;mov ebx, [ebp + 12]
+        ;mov eax, [ebx + 4]
 	;xor ebx, ebx
 	;mov bl, [eax]
 	;sub ebx, '0'
@@ -145,9 +188,9 @@ main:
 	ja exit_bad_arg
 
 	; create the filename
-	lea ecx, [filename + 7]
-	add bl, '0'
-	mov byte [ecx], bl
+	;lea ecx, [filename + 7]
+	;add bl, '0'
+	;mov byte [ecx], bl
 
 	; fd = open("./input{i}.dat", O_RDONLY):
 	mov eax, 5
@@ -170,7 +213,9 @@ main:
 	; close(fd):
 	mov eax, 6
 	int 0x80
-
+        
+        jmp task4
+        
 	; all input{i}.dat contents are now in ecx (address on stack)
 	pop eax
 	cmp eax, 1
