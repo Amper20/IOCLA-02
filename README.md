@@ -1,2 +1,0 @@
-# IOCLA-02
-Homework IOCLA2

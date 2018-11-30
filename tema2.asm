@@ -3,7 +3,6 @@ extern printf
 extern strlen
 extern strstr
 
-%include "io.inc"
 %define BAD_ARG_EXIT_CODE -1
 
 section .data
@@ -21,6 +20,7 @@ global main
 
 xor_strings:
 	; TODO TASK 1
+        ;parcurgem key-ul si stringul facind xor intre octetii elementelor, salvam rezultatul in ecx
         push ebp
         mov ebp, esp
  
@@ -45,6 +45,8 @@ lv:
 
 rolling_xor:
 	; TODO TASK 2
+        ;vom face xor intre elementul curent si elemntul precedent din string
+        ;astfel vom scapa de elementele m1,m2 din c3 obtinind doar m3 in c3
         push ebp
         mov ebp, esp
  
@@ -67,6 +69,8 @@ lv1:
         ret
 xor_hex_strings:
 	; TODO TASK 3
+        ; vom transforma in baza zecimala doua caractere din string si doua caractere din cheie,
+        ; obtinem doua elemente a,b; xor a,b; a va fi rezultatul decodarii
         push ebp
         mov ebp, esp
  
@@ -148,6 +152,9 @@ loop_hex_done:
         leave
 	ret
 base32decode:
+        ; parcurgem fiecare element din string si salvam 5 biti din element intr-un vector separat
+        ; parcurgem din 8 in 8 elementele vectorului abtinind stringul decodificat
+        ; vom scadea un numar de biti egal cu nr de egaluri din finalul stringului din vector
 	; TODO TASK 4
         push ebp
         mov ebp, esp
@@ -231,6 +238,11 @@ done_decoding:
 
 bruteforce_singlebyte_xor:
 	; TODO TASK 5
+        ;parcurgem fiecare cheie din rangeul 0 256
+        ;facem xor intre cheie si fiecare element din stringul pastrat in ecx
+        ;verificam folosind strstr daca stringul force e substring al mesajului, daca face => am obtinut cheia valida
+        ;daca nu e reatam procedura cu xor pentru a pastra nemodificat stringul la urmatoarea parcurgere
+        
         push ebp
         mov ebp, esp
         
@@ -276,6 +288,9 @@ done_brute:
 
 decode_vigenere:
 	; TODO TASK 6
+        ; scadem din fiecare element din string valoarea ofsetuluyi  din key
+        ; daca valoarea e sub 97 adaugam 26 -> valoarea modulo la elementul din string
+        ; 
         push ebp
         mov ebp,esp
         
@@ -441,7 +456,6 @@ done3:
         push ecx
         call xor_hex_strings
         add esp, 8
-
 	push ecx                     ;print resulting string
 	call puts
 	add esp, 4
