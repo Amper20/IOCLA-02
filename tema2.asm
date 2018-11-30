@@ -1,13 +1,15 @@
 extern puts
 extern printf
 extern strlen
+extern strstr
+
 %include "io.inc"
 %define BAD_ARG_EXIT_CODE -1
 
 section .data
 ;filename: db "/input0.dat", 0
 filename: db "/home/master/Desktop/iocla-tema2-resurse/IOCLA-02/input5.dat", 0
-
+force:    db "force",0
 inputlen: dd 2263
 
 fmtstr:            db "Key: %d",0xa, 0
@@ -137,22 +139,18 @@ don3:
         pop eax
         mov [eax], dl
         inc eax
-        
         cmp byte[ecx],0
         je loop_hex_done
         jmp loop_hex
-        
 loop_hex_done:
         mov byte[eax],0
         mov ecx, [ebp + 8] 
         leave
 	ret
-
 base32decode:
 	; TODO TASK 4
         push ebp
         mov ebp, esp
-        
         lea ebx, [ebp-4000]
         mov ecx, [esp + 8]
         mov edi,0
@@ -171,7 +169,6 @@ numar:
         shl dl,2
 divide:
         push eax
-        
         shl dl,1
         js add_one
         jmp add_zero
@@ -183,7 +180,6 @@ add_zero:
 skip_zero:
         xor eax,eax
         mov al, byte[ebx]
-        ;PRINT_CHAR al
         inc ebx
         pop eax
         sub eax,1
@@ -235,7 +231,48 @@ done_decoding:
 
 bruteforce_singlebyte_xor:
 	; TODO TASK 5
-	ret
+        push ebp
+        mov ebp, esp
+        
+        mov ecx,[esp + 8]
+        
+        mov ebx, 0
+        
+try_key:
+        ;xor ecx
+        mov ecx,[esp + 8]
+xor_ecx:
+        xor byte[ecx], bl
+        inc ecx
+        cmp byte[ecx],0
+        je done_ecx
+        jmp xor_ecx
+done_ecx:        
+        ;check
+        mov ecx, [esp + 8]
+        push force
+        push ecx
+        call strstr
+        add esp,8
+        cmp eax,0
+        jl done_brute
+        mov ecx, [esp + 8]
+        ;xor ecx
+        mov ecx,[esp + 8]
+xor_ecx1:
+        xor byte[ecx], bl
+        inc ecx
+        cmp byte[ecx],0
+        je done_ecx1
+        jmp xor_ecx1
+done_ecx1:        
+        inc ebx
+        jmp try_key
+        
+done_brute:
+        mov eax,ebx 
+        leave
+        ret
 
 decode_vigenere:
 	; TODO TASK 6
@@ -294,7 +331,7 @@ main:
 	mov eax, 6
 	int 0x80
         
-        jmp task4
+        jmp task5
         
 	; all input{i}.dat contents are now in ecx (address on stack)
 	pop eax
@@ -394,11 +431,15 @@ task5:
 	; TASK 5: Find the single-byte key used in a XOR encoding
 
 	; TODO TASK 5: call the bruteforce_singlebyte_xor function
-
-	push ecx                    ;print resulting string
-	call puts
+        
+        push ecx
+        call bruteforce_singlebyte_xor
+        pop ecx
+        push eax
+        push ecx
+	call puts                    ;print resulting string
 	pop ecx
-
+        pop eax
 	push eax                    ;eax = key value
 	push fmtstr
 	call printf                 ;print key value
