@@ -6,7 +6,7 @@ extern strlen
 
 section .data
 ;filename: db "/input0.dat", 0
-filename: db "/home/master/Desktop/iocla-tema2-resurse/IOCLA-02/input4.dat", 0
+filename: db "/home/master/Desktop/iocla-tema2-resurse/IOCLA-02/input5.dat", 0
 
 inputlen: dd 2263
 
@@ -14,7 +14,6 @@ fmtstr:            db "Key: %d",0xa, 0
 usage:             db "Usage: %s <task-no> (task-no can be 1,2,3,4,5,6)", 10, 0
 error_no_file:     db "Error: No input file %s", 10, 0
 error_cannot_read: db "Error: Cannot read input file %s", 10, 0
-
 section .text
 global main
 
@@ -151,6 +150,87 @@ loop_hex_done:
 
 base32decode:
 	; TODO TASK 4
+        push ebp
+        mov ebp, esp
+        
+        lea ebx, [ebp-4000]
+        mov ecx, [esp + 8]
+        mov edi,0
+loop_str:
+        push ecx
+        xor edx,edx
+        mov dl, byte[ecx]
+        cmp dl, 61
+        je skip_eq
+        cmp dl, 57
+        jle numar
+        sub dl, 41
+numar:
+        sub dl,24
+        mov eax, 5
+        shl dl,2
+divide:
+        push eax
+        
+        shl dl,1
+        js add_one
+        jmp add_zero
+add_one:
+        mov byte[ebx], 49
+        jmp skip_zero
+add_zero:
+        mov byte[ebx], 48
+skip_zero:
+        xor eax,eax
+        mov al, byte[ebx]
+        ;PRINT_CHAR al
+        inc ebx
+        pop eax
+        sub eax,1
+        cmp eax, 0
+        jg divide
+        
+        pop ecx
+        jmp to_ecx
+skip_eq:
+        inc edi
+to_ecx:
+        inc ecx
+        cmp byte[ecx],0
+        je done_base
+        jmp loop_str
+done_base:
+dec_ebx:
+        dec edi
+        dec ebx
+        cmp edi,0
+        jg dec_ebx
+        
+        mov byte[ebx],0
+        lea ebx, [ebp-4000]
+        
+        mov ecx, [esp + 8]
+        lea ebx, [ebp-4000]
+generate_chr:
+        mov edi,8
+        mov edx,0
+add_ch:
+        sub byte[ebx],48
+        shl dl,1
+        add dl, byte[ebx]
+        dec edi 
+        inc ebx
+        cmp edi,0
+        jg add_ch 
+        mov byte[ecx], dl
+        inc ecx
+        cmp byte[ebx],0
+        je done_decoding
+        jmp generate_chr        
+done_decoding:
+        mov byte[ecx],0
+        mov ecx, [esp + 8]
+        leave 
 	ret
 
 bruteforce_singlebyte_xor:
@@ -297,9 +377,13 @@ done3:
 
 task4:
 	; TASK 4: decoding a base32-encoded string
-
+        
 	; TODO TASK 4: call the base32decode function
 	
+        push ecx
+        call base32decode
+        add esp, 4
+
 	push ecx
 	call puts                    ;print resulting string
 	pop ecx
