@@ -7,8 +7,8 @@ extern strstr
 %define BAD_ARG_EXIT_CODE -1
 
 section .data
-;filename: db "/input0.dat", 0
-filename: db "/home/master/Desktop/iocla-tema2-resurse/IOCLA-02/input5.dat", 0
+filename: db "./input0.dat", 0
+;filename: db "/home/master/Desktop/iocla-tema2-resurse/IOCLA-02/input6.dat", 0
 force:    db "force",0
 inputlen: dd 2263
 
@@ -276,6 +276,45 @@ done_brute:
 
 decode_vigenere:
 	; TODO TASK 6
+        push ebp
+        mov ebp,esp
+        
+        mov ecx, [esp+8]
+        mov eax, [esp+12]
+        
+iterate_encoded:
+        cmp byte[ecx],97
+        jl skip_chr
+        jmp skip_skip
+skip_chr:
+        inc ecx
+        jmp iterate_encoded
+skip_skip:
+        
+        sub byte[eax],97
+        xor edx,edx
+        mov dl,byte[eax]
+        sub byte[ecx], dl
+        add byte[eax],97
+        cmp byte[ecx],97
+        jge skip
+        add byte[ecx],26        
+skip:
+        mov dl,byte[ecx]        
+        inc eax
+        cmp byte[eax],0
+        je rst_eax
+        jmp continue
+rst_eax:
+        mov eax, [esp+12]
+continue:        
+        inc ecx
+        cmp byte[ecx],0
+        je done_vig
+        jmp iterate_encoded
+done_vig:
+        
+        leave
 	ret
 
 main:
@@ -285,19 +324,18 @@ main:
 	sub esp, 2300
 
 	; test argc
-	;mov eax, [ebp + 8]
-	;cmp eax, 2
-	;jne exit_bad_arg
+	mov eax, [ebp + 8]
+	cmp eax, 2
+	jne exit_bad_arg
 
 	; get task no
-        ;mov ebx, [ebp + 12]
-        ;mov eax, [ebx + 4]
-	;xor ebx, ebx
-	;mov bl, [eax]
-	;sub ebx, '0'
-	;push ebx
-        
-        mov ebx,3
+        mov ebx, [ebp + 12]
+        mov eax, [ebx + 4]
+	xor ebx, ebx
+	mov bl, [eax]
+	sub ebx, '0'
+	push ebx
+
 	; verify if task no is in range
 	cmp ebx, 1
 	jb exit_bad_arg
@@ -305,9 +343,9 @@ main:
 	ja exit_bad_arg
 
 	; create the filename
-	;lea ecx, [filename + 7]
-	;add bl, '0'
-	;mov byte [ecx], bl
+	lea ecx, [filename + 7]
+	add bl, '0'
+	mov byte [ecx], bl
 
 	; fd = open("./input{i}.dat", O_RDONLY):
 	mov eax, 5
@@ -330,8 +368,6 @@ main:
 	; close(fd):
 	mov eax, 6
 	int 0x80
-        
-        jmp task5
         
 	; all input{i}.dat contents are now in ecx (address on stack)
 	pop eax
@@ -459,7 +495,7 @@ task6:
 
 	add eax, ecx
 	inc eax
-
+        
 	push eax
 	push ecx                   ;ecx = address of input string 
 	call decode_vigenere
